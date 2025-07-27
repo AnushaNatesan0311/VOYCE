@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .glass-effect {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20;
+  }
+  
+  .voice-button {
+    @apply w-32 h-32 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 shadow-2xl;
+  }
+  
+  .voice-button:hover {
+    @apply scale-110 shadow-3xl;
+  }
+  
+  .voice-button.listening {
+    @apply animate-pulse-slow;
+    background: linear-gradient(45deg, #00ff88, #00ccff);
+  }
+  
+  .voice-button.speaking {
+    @apply animate-wave;
+    background: linear-gradient(45deg, #ff4757, #ff3742);
+  }
+  
+  .voice-button.idle {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+  }
+  
+  .message-bubble {
+    @apply p-4 rounded-2xl mb-3 max-w-xs animate-in slide-in-from-bottom-2 duration-500;
+  }
+  
+  .user-message {
+    @apply bg-blue-500/30 ml-auto text-right;
+  }
+  
+  .assistant-message {
+    @apply bg-purple-500/30 mr-auto;
+  }
+  
+  .system-message {
+    @apply bg-yellow-500/30 mx-auto text-center text-sm italic;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .animate-in {
+    animation-fill-mode: both;
+  }
+  
+  .slide-in-from-bottom-2 {
+    animation-name: slideInFromBottom;
+  }
+  
+  @keyframes slideInFromBottom {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOYCE - Speak Local, Live Global</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffd700, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .voice-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #ffd700);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .voice-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .voice-button.listening {
+            animation: pulse 1.5s infinite;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+        }
+
+        .voice-button.speaking {
+            animation: wave 0.8s infinite alternate;
+            background: linear-gradient(45deg, #ff4757, #ff3742);
+        }
+
+        .voice-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes wave {
+            0% { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .mic-icon {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .status {
+            font-size: 1.2rem;
+            margin: 20px 0;
+            min-height: 30px;
+            font-weight: 500;
+        }
+
+        .status.listening {
+            color: #00ff88;
+        }
+
+        .status.speaking {
+            color: #ff6b6b;
+        }
+
+        .status.processing {
+            color: #ffd700;
+        }
+
+        .status.error {
+            color: #ff4757;
+        }
+
+        .conversation-log {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .user-message {
+            background: rgba(100, 126, 234, 0.3);
+            margin-left: 20px;
+        }
+
+        .assistant-message {
+            background: rgba(255, 107, 107, 0.3);
+            margin-right: 20px;
+        }
+
+        .system-message {
+            background: rgba(255, 215, 0, 0.3);
+            font-style: italic;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feature-status {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .feature-active {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .emergency-button {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .emergency-button:hover {
+            background: #ff3742;
+            transform: scale(1.05);
+        }
+
+        .language-selector {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 8px 15px;
+            color: white;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        .location-info {
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .permission-request {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .permission-button {
+            background: #00ff88;
+            color: #333;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            margin: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .connected {
+            background: rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+        }
+
+        .disconnected {
+            background: rgba(255, 71, 87, 0.3);
+            color: #ff4757;
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status" id="connectionStatus">🔴 Connecting...</div>
+    
+    <div class="container">
+        <div class="logo">VOYCE</div>
+        <div class="tagline">Speak Local, Live Global</div>
+        
+        <div class="permission-request" id="permissionRequest" style="display: none;">
+            <p>VOYCE needs access to your microphone and location for the best experience.</p>
+            <button class="permission-button" onclick="voyce.requestPermissions()">Grant Permissions</button>
+        </div>
+        
+        <button class="voice-button" id="voiceButton">
+            <div class="mic-icon">🎤</div>
+        </button>
+        
+        <div class="status" id="status">Initializing VOYCE...</div>
+        
+        <div class="location-info" id="locationInfo">
+            📍 Requesting location access...
+        </div>
+        
+        <select class="language-selector" id="languageSelect">
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="it">Italian</option>
+            <option value="pt">Portuguese</option>
+            <option value="hi">Hindi</option>
+            <option value="ta">Tamil</option>
+            <option value="ja">Japanese</option>
+            <option value="ko">Korean</option>
+            <option value="zh">Chinese</option>
+            <option value="ar">Arabic</option>
+        </select>
+        
+        <button class="emergency-button" id="emergencyButton">🚨 Emergency Help</button>
+        
+        <div class="feature-status">
+            <div class="feature-item" id="speechFeature">🎤 Speech Recognition</div>
+            <div class="feature-item" id="gpsFeature">📍 GPS Location</div>
+            <div class="feature-item" id="offlineFeature">📱 Offline Ready</div>
+            <div class="feature-item" id="cultureFeature">🌍 Culture Engine</div>
+        </div>
+        
+        <div class="conversation-log" id="conversationLog">
+            <div class="system-message">Welcome to VOYCE! I'm your AI travel companion ready to help with translations, cultural guidance, navigation, and emergency assistance.</div>
+        </div>
+    </div>
+
+    <script>
+        class VOYCEBackend {
+            constructor() {
+                this.apiEndpoint = 'https://api.voyce.travel'; // In real implementation
+                this.webSocketUrl = 'wss://api.voyce.travel/ws'; // In real implementation
+                this.isConnected = false;
+                this.offlineMode = false;
+                this.localDB = {};
+                this.initialize();
+            }
+
+            async initialize() {
+                try {
+                    // Simulate backend connection
+                    await this.connectToServer();
+                    this.setupOfflineCapabilities();
+                    this.initializeLocalDatabase();
+                } catch (error) {
+                    console.error('Backend initialization failed:', error);
+                    this.enableOfflineMode();
+                }
+            }
+
+            async connectToServer() {
+                return new Promise((resolve, reject) => {
+                    // Simulate connection attempt
+                    setTimeout(() => {
+                        if (navigator.onLine) {
+                            this.isConnected = true;
+                            resolve();
+                        } else {
+                            reject(new Error('No internet connection'));
+                        }
+                    }, 1000);
+                });
+            }
+
+            setupOfflineCapabilities() {
+                // Initialize offline data storage
+                this.localDB = {
+                    translations: {
+                        'hello': { 'ta': 'வணக்கம் (Vanakkam)', 'hi': 'नमस्ते (Namaste)', 'es': 'Hola' },
+                        'thank you': { 'ta': 'நன்றி (Nandri)', 'hi': 'धन्यवाद (Dhanyawad)', 'es': 'Gracias' },
+                        'where is': { 'ta': 'எங்கே இருக்கிறது (Enge irukkiradhu)', 'hi': 'कहाँ है (Kahan hai)', 'es': 'Dónde está' },
+                        'how much': { 'ta': 'எவ்வளவு (Evvalaavu)', 'hi': 'कितना (Kitna)', 'es': 'Cuánto cuesta' }
+                    },
+                    cultural_data: {
+                        'chennai': {
+                            greetings: ['Vanakkam with palms pressed together', 'Respectful nod for elders'],
+                            customs: ['Remove shoes before entering homes', 'Use right hand for giving/receiving'],
+                            emergencies: ['108 - Medical', '100 - Police', '101 - Fire', '1363 - Tourist Helpline']
+                        }
+                    },
+                    phrases: {
+                        emergency: {
+                            'ta': 'உதவி வேண்டும் (Udhavi vendum) - I need help',
+                            'hi': 'मदद चाहिए (Madad chahiye) - I need help',
+                            'es': 'Necesito ayuda - I need help'
+                        }
+                    }
+                };
+            }
+
+            enableOfflineMode() {
+                this.offlineMode = true;
+                this.isConnected = false;
+            }
+
+            initializeLocalDatabase() {
+                // In a real implementation, this would set up IndexedDB
+                console.log('Local database initialized for offline functionality');
+            }
+
+            async processVoiceInput(audioBlob) {
+                if (this.isConnected) {
+                    return await this.processOnline(audioBlob);
+                } else {
+                    return await this.processOffline(audioBlob);
+                }
+            }
+
+            async processOnline(audioBlob) {
+                // Simulate online processing
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        // Mock speech-to-text result
+                        const mockTranscripts = [
+                            "How do I say hello in Tamil?",
+                            "Where is the nearest restaurant?",
+                            "What are the local customs here?",
+                            "I need help with directions",
+                            "Can you translate this for me?",
+                            "What's the emergency number here?"
+                        ];
+                        
+                        const transcript = mockTranscripts[Math.floor(Math.random() * mockTranscripts.length)];
+                        resolve({ transcript, confidence: 0.95 });
+                    }, 1500);
+                });
+            }
+
+            async processOffline(audioBlob) {
+                // Simulate offline speech processing
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve({ 
+                            transcript: "Offline mode: Please type your request", 
+                            confidence: 0.8,
+                            offline: true 
+                        });
+                    }, 1000);
+                });
+            }
+
+            async generateResponse(transcript, context) {
+                const response = await this.analyzeAndRespond(transcript, context);
+                return response;
+            }
+
+            async analyzeAndRespond(transcript, context) {
+                const lowerTranscript = transcript.toLowerCase();
+                
+                // Translation requests
+                if (lowerTranscript.includes('say') && lowerTranscript.includes('in')) {
+                    return this.handleTranslationRequest(transcript, context);
+                }
+                
+                // Cultural inquiries
+                if (lowerTranscript.includes('custom') || lowerTranscript.includes('culture') || lowerTranscript.includes('etiquette')) {
+                    return this.handleCulturalInquiry(context);
+                }
+                
+                // Emergency requests
+                if (lowerTranscript.includes('emergency') || lowerTranscript.includes('help') || lowerTranscript.includes('urgent')) {
+                    return this.handleEmergencyRequest(context);
+                }
+                
+                // Location/navigation requests
+                if (lowerTranscript.includes('where') || lowerTranscript.includes('direction') || lowerTranscript.includes('navigate')) {
+                    return this.handleLocationRequest(transcript, context);
+                }
+                
+                // General travel assistance
+                return this.handleGeneralAssistance(transcript, context);
+            }
+
+            handleTranslationRequest(transcript, context) {
+                const targetLang = context.selectedLanguage;
+                
+                if (transcript.includes('hello')) {
+                    const translation = this.localDB.translations['hello'][targetLang] || 'Hello';
+                    return {
+                        text: `In ${targetLang.toUpperCase()}, you say: "${translation}". This is the most common and respectful way to greet someone locally.`,
+                        cultural_note: "Remember to use appropriate body language - a slight bow or palms pressed together shows respect in many cultures.",
+                        audio_url: null // Would contain TTS audio URL in real implementation
+                    };
+                }
+                
+                return {
+                    text: `I can help you translate that into ${targetLang.toUpperCase()}. For the phrase you mentioned, locals would typically say it with cultural context in mind. Would you like me to provide the exact pronunciation as well?`,
+                    cultural_note: "Translations are adapted for local customs and formality levels.",
+                    audio_url: null
+                };
+            }
+
+            handleCulturalInquiry(context) {
+                const location = context.location?.city?.toLowerCase() || 'general';
+                const culturalData = this.localDB.cultural_data[location] || this.localDB.cultural_data['chennai'];
+                
+                return {
+                    text: `Here are important cultural customs for your location: ${culturalData.customs.join(', ')}. For greetings: ${culturalData.greetings.join(', ')}. These practices show respect and help you connect better with locals.`,
+                    cultural_note: "Understanding local customs helps create meaningful connections and shows respect for the culture.",
+                    audio_url: null
+                };
+            }
+
+            handleEmergencyRequest(context) {
+                const location = context.location?.city?.toLowerCase() || 'general';
+                const emergencyData = this.localDB.cultural_data[location]?.emergencies || ['112 - Universal Emergency'];
+                
+                return {
+                    text: `🚨 EMERGENCY ASSISTANCE: Important numbers for your location: ${emergencyData.join(', ')}. Your current location has been noted. Stay calm and I'm here to help guide you through any emergency situation.`,
+                    cultural_note: "Keep these numbers saved in your phone. Hotel staff can also assist with local emergency services.",
+                    audio_url: null,
+                    priority: 'high',
+                    autoEscalate: true
+                };
+            }
+
+            handleLocationRequest(transcript, context) {
+                return {
+                    text: `Based on your location in ${context.location?.city || 'your area'}, I can help you navigate. For restaurants, head towards the main commercial district. For tourist attractions, I recommend checking Marina Beach or local temples. Would you like specific walking directions?`,
+                    cultural_note: "Local transportation includes auto-rickshaws, buses, and ride-sharing apps. Always negotiate auto-rickshaw fares beforehand.",
+                    audio_url: null
+                };
+            }
+
+            handleGeneralAssistance(transcript, context) {
+                return {
+                    text: `I understand you're asking about "${transcript}". As your travel companion in ${context.location?.city || 'this area'}, I'm here to help with language, culture, navigation, and any challenges you face. What specific aspect would you like me to focus on?`,
+                    cultural_note: "Feel free to ask about anything - from basic phrases to complex cultural situations. I'm designed to help you navigate like a local.",
+                    audio_url: null
+                };
+            }
+
+            async synthesizeSpeech(text, language = 'en') {
+                if (this.isConnected) {
+                    // In real implementation, this would call TTS API
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve({ success: true, duration: text.length * 50 });
+                        }, 500);
+                    });
+                } else {
+                    // Offline TTS simulation
+                    return { success: true, duration: text.length * 60 };
+                }
+            }
+
+            getConnectionStatus() {
+                return {
+                    isConnected: this.isConnected,
+                    offlineMode: this.offlineMode,
+                    lastSync: new Date().toISOString()
+                };
+            }
+        }
+
+        class VOYCETravelAssistant {
+            constructor() {
+                this.backend = new VOYCEBackend();
+                this.speechRecognition = null;
+                this.speechSynthesis = window.speechSynthesis;
+                this.isListening = false;
+                this.isSpeaking = false;
+                this.currentLanguage = 'en';
+                this.userLocation = null;
+                this.conversationHistory = [];
+                this.userMood = 'neutral';
+                this.permissionsGranted = false;
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                
+                this.initializeElements();
+                this.initializeFeatures();
+                this.setupEventListeners();
+                this.requestInitialPermissions();
+            }
+            
+            initializeElements() {
+                this.voiceButton = document.getElementById('voiceButton');
+                this.status = document.getElementById('status');
+                this.conversationLog = document.getElementById('conversationLog');
+                this.locationInfo = document.getElementById('locationInfo');
+                this.languageSelect = document.getElementById('languageSelect');
+                this.emergencyButton = document.getElementById('emergencyButton');
+                this.connectionStatus = document.getElementById('connectionStatus');
+                this.permissionRequest = document.getElementById('permissionRequest');
+            }
+            
+            async initializeFeatures() {
+                // Initialize speech recognition
+                if ('webkitSpeechRecognition' in window) {
+                    this.speechRecognition = new webkitSpeechRecognition();
+                    this.speechRecognition.continuous = false;
+                    this.speechRecognition.interimResults = false;
+                    this.speechRecognition.lang = this.currentLanguage;
+                    
+                    this.speechRecognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        this.handleSpeechResult(transcript);
+                    };
+                    
+                    this.speechRecognition.onerror = (event) => {
+                        this.handleSpeechError(event.error);
+                    };
+                    
+                    document.getElementById('speechFeature').classList.add('feature-active');
+                }
+                
+                // Monitor connection status
+                this.monitorConnection();
+                
+                // Initialize other features with delays for UX
+                setTimeout(() => {
+                    document.getElementById('gpsFeature').classList.add('feature-active');
+                    this.getCurrentLocation();
+                }, 1000);
+                
+                setTimeout(() => {
+                    document.getElementById('offlineFeature').classList.add('feature-active');
+                }, 1500);
+                
+                setTimeout(() => {
+                    document.getElementById('cultureFeature').classList.add('feature-active');
+                }, 2000);
+            }
+            
+            monitorConnection() {
+                setInterval(() => {
+                    const status = this.backend.getConnectionStatus();
+                    this.updateConnectionStatus(status);
+                }, 5000);
+                
+                // Initial status update
+                setTimeout(() => {
+                    this.updateConnectionStatus(this.backend.getConnectionStatus());
+                }, 2000);
+            }
+            
+            updateConnectionStatus(status) {
+                const element = this.connectionStatus;
+                if (status.isConnected) {
+                    element.textContent = '🟢 Connected';
+                    element.className = 'connection-status connected';
+                } else {
+                    element.textContent = '🟡 Offline Mode';
+                    element.className = 'connection-status disconnected';
+                }
+            }
+            
+            async requestInitialPermissions() {
+                this.permissionRequest.style.display = 'block';
+                this.status.textContent = 'Please grant permissions to continue';
+            }
+            
+            async requestPermissions() {
+                try {
+                    // Request microphone permission
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    stream.getTracks().forEach(track => track.stop()); // Stop after getting permission
+                    
+                    this.permissionsGranted = true;
+                    this.permissionRequest.style.display = 'none';
+                    this.status.textContent = 'Ready! Tap the microphone to start';
+                    this.voiceButton.disabled = false;
+                    
+                    this.addMessage('system', 'Permissions granted! VOYCE is ready to assist you.');
+                    
+                } catch (error) {
+                    this.addMessage('system', 'Microphone access denied. Please enable it in your browser settings for voice features.');
+                    this.status.textContent = 'Limited functionality - enable microphone for voice features';
+                    this.status.classList.add('error');
+                }
+            }
+            
+            async getCurrentLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            this.userLocation = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude,
+                                city: 'Chennai', // Would use reverse geocoding in real implementation
+                                country: 'India'
+                            };
+                            this.locationInfo.innerHTML = `📍 Located in ${this.userLocation.city}, ${this.userLocation.country}`;
+                        },
+                        (error) => {
+                            this.locationInfo.innerHTML = '📍 Location access denied - using general assistance mode';
+                        }
+                    );
+                } else {
+                    this.locationInfo.innerHTML = '📍 Geolocation not supported - using general assistance mode';
+                }
+            }
+            
+            setupEventListeners() {
+                this.voiceButton.addEventListener('click', () => this.toggleVoiceRecording());
+                this.languageSelect.addEventListener('change', (e) => this.changeLanguage(e.target.value));
+                this.emergencyButton.addEventListener('click', () => this.handleEmergency());
+                
+                // Add keyboard shortcut for voice activation
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space' && e.ctrlKey) {
+                        e.preventDefault();
+                        this.toggleVoiceRecording();
+                    }
+                });
+            }
+            
+            async toggleVoiceRecording() {
+                if (!this.permissionsGranted) {
+                    await this.requestPermissions();
+                    return;
+                }
+                
+                if (this.isSpeaking) return;
+                
+                if (!this.isListening) {
+                    this.startListening();
+                } else {
+                    this.stopListening();
+                }
+            }
+            
+            async startListening() {
+                this.isListening = true;
+                this.voiceButton.classList.add('listening');
+                this.status.textContent = 'Listening... Speak now';
+                this.status.classList.add('listening');
+                
+                try {
+                    if (this.speechRecognition) {
+                        this.speechRecognition.start();
+                    } else {
+                        // Fallback to media recorder for browsers without speech recognition
+                        await this.startAudioRecording();
+                    }
+                } catch (error) {
+                    this.handleSpeechError(error.message);
+                }
+            }
+            
+            stopListening() {
+                this.isListening = false;
+                this.voiceButton.classList.remove('listening');
+                this.status.classList.remove('listening');
+                this.status.textContent = 'Processing...';
+                this.status.classList.add('processing');
+                
+                if (this.speechRecognition) {
+                    this.speechRecognition.stop();
+                }
+                
+                if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+                    this.mediaRecorder.stop();
+                }
+            }
+            
+            async startAudioRecording() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    this.audioChunks = [];
+                    
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        this.audioChunks.push(event.data);
+                    };
+                    
+                    this.mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                        await this.processAudioBlob(audioBlob);
+                    };
+                    
+                    this.mediaRecorder.start();
+                    
+                    // Auto-stop after 10 seconds
+                    setTimeout(() => {
+                        if (this.isListening) {
+                            this.stopListening();
+                        }
+                    }, 10000);
+                    
+                } catch (error) {
+                    this.handleSpeechError('Audio recording failed');
+                }
+            }
+            
+            async processAudioBlob(audioBlob) {
+                try {
+                    const result = await this.backend.processVoiceInput(audioBlob);
+                    this.handleSpeechResult(result.transcript);
+                } catch (error) {
+                    this.handleSpeechError('Processing failed');
+                }
+            }
+            
+            async handleSpeechResult(transcript) {
+                this.addMessage('user', transcript);
+                
+                const context = {
+                    location: this.userLocation,
+                    selectedLanguage: this.currentLanguage,
+                    conversationHistory: this.conversationHistory,
+                    mood: this.detectMood(transcript)
+                };
+                
+                try {
+                    const response = await this.backend.generateResponse(transcript, context);
+                    this.addMessage('assistant', response.text);
+                    
+                    if (response.cultural_note) {
+                        this.addMessage('system', `💡 Cultural Tip: ${response.cultural_note}`);
+                    }
+                    
+                    await this.speakResponse(response.text);
+                    
+                    if (response.autoEscalate) {
+                        this.startEmergencyEscalation();
+                    }
+                    
+                } catch (error) {
+                    this.addMessage('system', 'Sorry, I encountered an error processing your request. Please try again.');
+                    this.status.textContent = 'Error occurred - tap to try again';
+                    this.status.classList.add('error');
+                }
+            }
+            
+            handleSpeechError(error) {
+                this.isListening = false;
+                this.voiceButton.classList.remove('listening');
+                this.status.classList.remove('listening', 'processing');
+                this.status.classList.add('error');
+                this.status.textContent = `Speech error: ${error} - Tap to try again`;
+                
+                this.addMessage('system', `Voice recognition error: ${error}. You can try speaking again or type your message.`);
+            }
+            
+            detectMood(input) {
+                const moodKeywords = {
+                    happy: ['great', 'awesome', 'wonderful', 'excited', 'amazing'],
+                    sad: ['lost', 'confused', 'worried', 'scared', 'frustrated'],
+                    urgent: ['emergency', 'urgent', 'quickly', 'now', 'help'],
+                    neutral: ['where', 'how', 'what', 'when', 'can you']
+                };
+                
+                for (const [mood, keywords] of Object.entries(moodKeywords)) {
+                    if (keywords.some(keyword => input.toLowerCase().includes(keyword))) {
+                        return mood;
+                    }
+                }
+                return 'neutral';
+            }
+            
+            async speakResponse(text) {
+                this.isSpeaking = true;
+                this.voiceButton.classList.add('speaking');
+                this.status.textContent = 'Speaking...';
+                this.status.classList.remove('processing', 'error');
+                this.status.classList.add('speaking');
+                
+                try {
+                    // Use backend TTS service
+                    const ttsResult = await this.backend.synthesizeSpeech(text, this.currentLanguage);
+                    
+                    // Fallback to browser TTS
+                    if (this.speechSynthesis && this.speechSynthesis.getVoices().length > 0) {
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = this.getLanguageCode(this.currentLanguage);
+                        utterance.rate = 0.9;
+                        utterance.pitch = 1.0;
+                        
+                        utterance.onend = () => {
+                            this.finishSpeaking();
+                        };
+                        
+                        utterance.onerror = () => {
+                            this.finishSpeaking();
+                        };
+                        
+                        this.speechSynthesis.speak(utterance);
+                    } else {
+                        // Simulate speech duration if no TTS available
+                        setTimeout(() => {
+                            this.finishSpeaking();
+                        }, Math.max(2000, text.length * 60));
+                    }
+                } catch (error) {
+                    console.error('TTS Error:', error);
+                    this.finishSpeaking();
+                }
+            }
+            
+            finishSpeaking() {
+                this.isSpeaking = false;
+                this.voiceButton.classList.remove('speaking');
+                this.status.classList.remove('speaking');
+                this.status.textContent = 'Ready - tap to speak again';
+            }
+            
+            getLanguageCode(langCode) {
+                const languageCodes = {
+                    'en': 'en-US',
+                    'es': 'es-ES',
+                    'fr': 'fr-FR',
+                    'de': 'de-DE',
+                    'it': 'it-IT',
+                    'pt': 'pt-PT',
+                    'hi': 'hi-IN',
+                    'ta': 'ta-IN',
+                    'ja': 'ja-JP',
+                    'ko': 'ko-KR',
+                    'zh': 'zh-CN',
+                    'ar': 'ar-SA'
+                };
+                return languageCodes[langCode] || 'en-US';
+            }
+            
+            addMessage(sender, text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}-message`;
+                messageDiv.textContent = sender === 'user' ? `You: ${text}` : 
+                                       sender === 'assistant' ? `VOYCE: ${text}` : 
+                                       text;
+                
+                this.conversationLog.appendChild(messageDiv);
+                this.conversationLog.scrollTop = this.conversationLog.scrollHeight;
+                
+                this.conversationHistory.push({ sender, text, timestamp: new Date().toISOString() });
+                
+                // Keep conversation history manageable
+                if (this.conversationHistory.length > 50) {
+                    this.conversationHistory = this.conversationHistory.slice(-40);
+                }
+            }
+            
+            changeLanguage(language) {
+                this.currentLanguage = language;
+                if (this.speechRecognition) {
+                    this.speechRecognition.lang = this.getLanguageCode(language);
+                }
+                this.addMessage('system', `Language changed to ${this.getLanguageName(language)}. VOYCE will now respond in ${language} when possible.`);
+            }
+            
+            getLanguageName(code) {
+                const names = {
+                    'en': 'English', 'es': 'Spanish', 'fr': 'French', 'de': 'German',
+                    'it': 'Italian', 'pt': 'Portuguese', 'hi': 'Hindi', 'ta': 'Tamil',
+                    'ja': 'Japanese', 'ko': 'Korean', 'zh': 'Chinese', 'ar': 'Arabic'
+                };
+                return names[code] || code;
+            }
+            
+            async handleEmergency() {
+                this.addMessage('system', '🚨 EMERGENCY MODE ACTIVATED');
+                
+                const context = {
+                    location: this.userLocation,
+                    selectedLanguage: this.currentLanguage,
+                    priority: 'emergency'
+                };
+                
+                try {
+                    const emergencyResponse = await this.backend.generateResponse('emergency help needed', context);
+                    this.addMessage('assistant', emergencyResponse.text);
+                    await this.speakResponse(emergencyResponse.text);
+                    
+                    if (emergencyResponse.autoEscalate) {
+                        this.startEmergencyEscalation();
+                    }
+                } catch (error) {
+                    // Fallback emergency response
+                    const fallbackResponse = `🚨 EMERGENCY ASSISTANCE: Call local emergency services immediately. Universal emergency number: 112. Your location: ${this.userLocation?.city || 'Location detection in progress'}. Stay calm, help is coming.`;
+                    this.addMessage('assistant', fallbackResponse);
+                    await this.speakResponse(fallbackResponse);
+                }
+            }
+            
+            startEmergencyEscalation() {
+                let countdown = 30;
+                const countdownInterval = setInterval(() => {
+                    if (countdown > 0) {
+                        this.status.textContent = `Emergency escalation in ${countdown}s - Say "I'm safe" to cancel`;
+                        this.status.classList.add('error');
+                        countdown--;
+                    } else {
+                        clearInterval(countdownInterval);
+                        this.executeEmergencyEscalation();
+                    }
+                }, 1000);
+                
+                // Listen for cancellation
+                const originalOnResult = this.speechRecognition?.onresult;
+                if (this.speechRecognition) {
+                    this.speechRecognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript.toLowerCase();
+                        if (transcript.includes("i'm safe") || transcript.includes("im safe") || transcript.includes("cancel")) {
+                            clearInterval(countdownInterval);
+                            this.addMessage('system', '✅ Emergency escalation cancelled. Glad you\'re safe!');
+                            this.status.textContent = 'Emergency cancelled - tap to continue';
+                            this.status.classList.remove('error');
+                            this.speechRecognition.onresult = originalOnResult;
+                        } else {
+                            originalOnResult?.(event);
+                        }
+                    };
+                }
+            }
+            
+            executeEmergencyEscalation() {
+                this.addMessage('system', '⚠️ EMERGENCY ESCALATION: No response detected. Attempting to contact emergency services...');
+                this.status.textContent = 'Emergency services contacted';
+                
+                // In a real implementation, this would:
+                // 1. Send location and user data to emergency services
+                // 2. Contact local emergency numbers
+                // 3. Notify emergency contacts
+                // 4. Provide continuous location tracking
+                
+                setTimeout(() => {
+                    this.addMessage('system', '📞 Emergency services have been notified of your location and situation. Help is on the way. Stay where you are if safe to do so.');
+                }, 2000);
+            }
+        }
+
+        // Backend Service Worker for Offline Functionality
+        class VOYCEServiceWorker {
+            static register() {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/voyce-sw.js')
+                        .then(registration => {
+                            console.log('VOYCE Service Worker registered:', registration);
+                        })
+                        .catch(error => {
+                            console.log('Service Worker registration failed:', error);
+                        });
+                }
+            }
+            
+            static async cacheEssentialData() {
+                // Cache critical offline data
+                const essentialData = {
+                    translations: true,
+                    emergencyNumbers: true,
+                    basicPhrases: true,
+                    culturalTips: true
+                };
+                
+                if ('caches' in window) {
+                    const cache = await caches.open('voyce-offline-v1');
+                    // Cache essential resources
+                }
+            }
+        }
+
+        // Global VOYCE instance
+        let voyce;
+        
+        // Initialize VOYCE when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            voyce = new VOYCETravelAssistant();
+            VOYCEServiceWorker.register();
+            VOYCEServiceWorker.cacheEssentialData();
+            
+            // Add global error handling
+            window.addEventListener('error', (event) => {
+                console.error('VOYCE Error:', event.error);
+                if (voyce) {
+                    voyce.addMessage('system', 'An error occurred. VOYCE is still running and ready to help.');
+                }
+            });
+            
+            // Handle online/offline status
+            window.addEventListener('online', () => {
+                if (voyce) {
+                    voyce.addMessage('system', '🟢 Connection restored. Full functionality available.');
+                    voyce.backend.isConnected = true;
+                    voyce.backend.offlineMode = false;
+                }
+            });
+            
+            window.addEventListener('offline', () => {
+                if (voyce) {
+                    voyce.addMessage('system', '🟡 Connection lost. Switching to offline mode.');
+                    voyce.backend.enableOfflineMode();
+                }
+            });
+        });
+        
+        // Expose global functions
+        window.voyce = {
+            requestPermissions: () => voyce?.requestPermissions(),
+            toggleVoice: () => voyce?.toggleVoiceRecording(),
+            emergency: () => voyce?.handleEmergency()
+        };
+    </script>
+</body>
+</html>
